@@ -7,16 +7,26 @@
     tools:context=".SettingsActivity">
 
     <Switch
-        android:id="@+id/switch1"
+        android:id="@+id/loop_switch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="524dp"
-        android:layout_marginEnd="286dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:text="Switch"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:textSize="16dp"
+        android:text="Loop"
+        android:onClick="onLoopClick"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Switch
+        android:id="@+id/random_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="Random"
+        android:textSize="16dp"
+        android:onClick="onRandomClick"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/loop_switch" />
 </android.support.constraint.ConstraintLayout>

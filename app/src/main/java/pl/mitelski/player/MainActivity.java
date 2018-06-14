@@ -143,6 +143,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.Item
             Log.d(TAG, "PLAY");
 //            startService(intent.setAction(PlayerService.ACTION_PLAY));
             playerService.play();
+            getSupportActionBar().setTitle(Songs.SONGS.get(PlayerService.ACTUAL_ID).getTitle());
             ((ImageButton) view).setImageResource(android.R.drawable.ic_media_pause);
 
             seekBar.setMax(PlayerService.MAX_DURATION);

@@ -30,6 +30,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.MyViewHolder
         Song song = songList.get(i);
         holder.title.setText(song.getTitle());
         holder.artist.setText(song.getArtist());
+        holder.duration.setText(song.min + ":" + song.sec);
     }
 
     @Override

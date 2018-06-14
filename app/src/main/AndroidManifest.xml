@@ -22,16 +22,17 @@
         <activity
             android:name=".AboutActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".MainActivity"/>
 
         <service
             android:name=".PlayerService"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="true"
+            android:stopWithTask="true"/>
 
         <activity android:name=".SettingsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:parentActivityName=".MainActivity" ></activity>
+            android:parentActivityName=".MainActivity"></activity>
     </application>
 
 </manifest>

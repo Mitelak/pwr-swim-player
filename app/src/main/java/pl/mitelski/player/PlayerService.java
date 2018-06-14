@@ -18,6 +18,8 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.util.Random;
+
 public class PlayerService extends Service implements MediaPlayer.OnCompletionListener {
     private static final String LOG_TAG = "PlayerService";
     public static boolean IS_SERVICE_RUNNING = false;
@@ -31,12 +33,9 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     public static Songs songs = new Songs();
 
     public static int SCROLL_TIME = 10000;
-    public static final String ACTION_CHANGE = "pl.mitelski.player.action.CHANGE";
-    public static final String ACTION_PLAY = "pl.mitelski.player.action.PLAY";
-    public static final String ACTION_PAUSE = "pl.mitelski.player.action.PAUSE";
-    public static final String ACTION_NEXT = "pl.mitelski.player.action.NEXT";
-    public static final String ACTION_FORWARD = "pl.mitelski.player.action.FORWARD";
-    public static final String ACTION_BACKWARD = "pl.mitelski.player.action.BACKWARD";
+
+    public static boolean PLAY_LOOP = false;
+    public static boolean PLAY_RANDOM = false;
 
     public static MediaPlayer mp = null;
     Notification notification = null;
@@ -103,11 +102,13 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     }
 
     public void backward() {
-        mp.seekTo(mp.getCurrentPosition() - SCROLL_TIME );
+        if (mp != null)
+            mp.seekTo(mp.getCurrentPosition() - SCROLL_TIME );
     }
 
     public void forward() {
-        mp.seekTo(mp.getCurrentPosition() + SCROLL_TIME );
+        if (mp != null)
+            mp.seekTo(mp.getCurrentPosition() + SCROLL_TIME );
     }
 
     public void changeSong(int id) {
@@ -129,7 +130,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
                 // TODO loop
-                if (ACTUAL_ID < songs.size())
+                if (ACTUAL_ID + 1 < songs.size() || PLAY_LOOP)
                     next();
             }
         });
@@ -138,7 +139,12 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
     }
 
     private void next() {
-        changeSong((ACTUAL_ID + 1) % songs.size());
+        if (PLAY_RANDOM) {
+            Random rand = new Random();
+            changeSong(rand.nextInt(songs.size()));
+        } else {
+            changeSong((ACTUAL_ID + 1) % songs.size());
+        }
         play();
     }
 
