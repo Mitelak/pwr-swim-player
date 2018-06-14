@@ -10,9 +10,4 @@ public class AboutActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
     }
-
-    @Override
-    public void onBackPressed() {
-        moveTaskToBack(true);
-    }
 }

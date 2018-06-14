@@ -4,6 +4,7 @@ public class Song {
     String title;
     String artist;
     int file_id;
+    int duration;
 
     public Song(String title, String artist, int file_id) {
         this.title = title;

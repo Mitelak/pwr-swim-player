@@ -1,8 +1,12 @@
 package pl.mitelski.player;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.media.MediaPlayer;
 import android.os.Handler;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -33,7 +37,9 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.Item
     private List<Song> songs = new ArrayList<>();
     private RecyclerView recyclerView;
     private SongsAdapter sAdapter;
-    private Player player;
+
+    PlayerService playerService;
+    boolean bound = false;
 
     private SeekBar seekBar;
     private Handler handler = new Handler();
@@ -45,9 +51,20 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.Item
 
         initUI();
         initSeekbar();
-        getSongs();
-        player = new Player(this, songs);
+//        songs = Songs.SONGS;
+
+        Intent intent = new Intent(this, PlayerService.class);
+        this.bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        this.startService(intent);
         Log.d(TAG, "onCreate: done");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (bound)
+            unbindService(connection);
+        bound = false;
     }
 
     @Override
@@ -57,10 +74,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.Item
         return true;
     }
 
-    @Override
-    public void onBackPressed() {
-        moveTaskToBack(true);
-    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -68,32 +81,31 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.Item
             case R.id.about:
                 startActivity(new Intent(this, AboutActivity.class));
                 return true;
-
+            case R.id.settings:
+                startActivity(new Intent(this, SettingsActivity.class));
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
 
     }
 
-    private void getSongs() {
-        songs.add(new Song("Nostalgia", "Taco Hemingway", R.raw.nostalgia));
-        songs.add(new Song("Chodź", "Taco Hemingway", R.raw.chodz));
-    }
-
     @Override
     public void onItemClick(View view, int pos) {
         Log.d("click", "clicked: " + pos);
 
-        player.changeSong(pos);
-//        mediaPlayer = MediaPlayer.create(this, sAdapter.getItem(pos).getFileId());
-//        mediaPlayer.start();
-//        player.play();
+//        Intent intent = new Intent(MainActivity.this, PlayerService.class);
+//        intent.putExtra("ID",  pos);
+//        startService(intent.setAction(PlayerService.ACTION_CHANGE));
+//        startService(intent.setAction(PlayerService.ACTION_PLAY));
+        playerService.changeSong(pos);
+//        playerService.play();
         buttonPlayPause(findViewById(R.id.play_pause));
     }
 
     private void initUI() {
         recyclerView = findViewById(R.id.recycler_songs);
-        sAdapter = new SongsAdapter(songs);
+        sAdapter = new SongsAdapter();
         sAdapter.setClickListener(this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(sAdapter);
@@ -109,7 +121,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.Item
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                         if (fromUser) {
-                            player.seekTo(progress);
+                          playerService.seekTo(progress);
                         }
                     }
 
@@ -124,38 +136,60 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.Item
     }
 
     void buttonPlayPause(View view) {
-//        if (player.isEmpty() && sAdapter.getItemCount() > 0) {
-//            player.changeSong(sAdapter.getItem(0), 0);
-//        }
+        // start service
+//        Intent intent = new Intent(MainActivity.this, PlayerService.class);
+        Log.d(TAG, "PLAY_PAUSE");
+        if (!PlayerService.IS_PLAYING) {
+            Log.d(TAG, "PLAY");
+//            startService(intent.setAction(PlayerService.ACTION_PLAY));
+            playerService.play();
+            ((ImageButton) view).setImageResource(android.R.drawable.ic_media_pause);
 
-        if (!player.isPlaying()) {
-            player.play();
-            ((ImageButton) view).setImageResource(R.drawable.ic_pause_black_24dp);
-            seekBar.setMax(player.mediaPlayer.getDuration());
-        } else if (player.isPlaying()) {
-            player.pause();
-            ((ImageButton) view).setImageResource(R.drawable.ic_play_arrow_black_24dp);
-            Log.d(TAG, "isPlaying: " + player.mediaPlayer.getDuration());
+            seekBar.setMax(PlayerService.MAX_DURATION);
+        } else if (PlayerService.IS_PLAYING) {
+
+            Log.d(TAG, "PAUSE");
+            playerService.pause();
+//            startService(intent.setAction(PlayerService.ACTION_PAUSE));
+            ((ImageButton) view).setImageResource(android.R.drawable.ic_media_play);
         }
 
 
         MainActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (!player.isEmpty()) {
-                    int currentSeekPosition = player.mediaPlayer.getCurrentPosition();
-                    seekBar.setProgress(currentSeekPosition);
-                }
+                int currentSeekPosition = playerService.getCurrentPosition();
+                seekBar.setProgress(currentSeekPosition);
                 handler.postDelayed(this, 1000);
             }
         });
     }
 
     void buttonForward(View view) {
-        player.forward();
+//        Intent intent = new Intent(MainActivity.this, PlayerService.class);
+//        startService(intent.setAction(PlayerService.ACTION_FORWARD));
+        playerService.forward();
     }
 
     void buttonBackward(View view) {
-        player.backward();
+        playerService.backward();
     }
+
+
+    private ServiceConnection connection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            PlayerService.LocalBinder binder = (PlayerService.LocalBinder) service;
+            playerService = binder.getService();
+            bound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            bound = false;
+        }
+    };
 }

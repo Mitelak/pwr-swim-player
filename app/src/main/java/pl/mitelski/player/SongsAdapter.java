@@ -14,8 +14,8 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.MyViewHolder
     private List<Song> songList;
     private ItemClickListener clickListener;
 
-    public SongsAdapter(List<Song> songList) {
-        this.songList = songList;
+    public SongsAdapter() {
+        this.songList = Songs.SONGS;
     }
 
     @Override
@@ -40,14 +40,16 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.MyViewHolder
     public class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView title;
         TextView artist;
-        ImageView cover;
+        TextView duration;
+//        ImageView cover;
 
         public MyViewHolder(View itemView) {
             super(itemView);
 
             title = itemView.findViewById(R.id.title);
             artist = itemView.findViewById(R.id.artist);
-            cover = itemView.findViewById(R.id.cover);
+            duration = itemView.findViewById(R.id.duration);
+//            cover = itemView.findViewById(R.id.cover);
 
             itemView.setOnClickListener(this);
         }
